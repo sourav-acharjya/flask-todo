@@ -26,9 +26,9 @@ def index():
     completed_tasks = Task.query.filter_by(completed=True).count()
     pending_tasks = total_tasks - completed_tasks
     progress_percent = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
-    
-    return render_template('index.html', 
-                           tasks=tasks, 
+
+    return render_template('index.html',
+                           tasks=tasks,
                            total_tasks=total_tasks,
                            completed_tasks=completed_tasks,
                            pending_tasks=pending_tasks,
@@ -50,12 +50,29 @@ def complete(id):
     db.session.commit()
     return jsonify({'success': True, 'completed': task.completed})
 
-@app.route('/delete/<int:id>', methods=['POST'])
+
+@app.route("/edit/<int:id>", methods=["POST"])
+def edit(id):
+    data = request.get_json()
+
+    task = Task.query.get_or_404(id)
+
+    task.content = data["content"]
+
+    db.session.commit()
+
+    return jsonify({"success": True})
+
+
+@app.route("/delete/<int:id>", methods=["POST"])
 def delete(id):
     task = Task.query.get_or_404(id)
+
     db.session.delete(task)
     db.session.commit()
-    return jsonify({'success': True})
+
+    return jsonify({"success": True})
+
 
 @app.route('/reorder', methods=['POST'])
 def reorder():
